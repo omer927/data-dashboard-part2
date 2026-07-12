@@ -10,17 +10,22 @@ function App() {
   const [filteredResults, setFilteredResults] = useState([]);
 
   useEffect(() => {
-    const fetchAllRecipeData = async () => {
+  const fetchAllRecipeData = async () => {
+    try {
       const response = await fetch(
         `https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&addRecipeInformation=true&fillIngredients=true&number=12`
       );
+      if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       if (data.results) {
         setList(data.results);
         setFilteredResults(data.results);
       }
-    };
-    fetchAllRecipeData().catch(console.error);
+      } catch (error) {
+      console.error("Failed to fetch:", error);
+    }
+  };
+    fetchAllRecipeData();
   }, []);
 
   const searchItems = (searchValue) => {
@@ -48,6 +53,8 @@ function App() {
   const avgPrice = list.length > 0 ? (list.reduce((acc, curr) => acc + curr.pricePerServing, 0) / list.length).toFixed(2) : 0;
   const mostExpensive = list.length > 0 ? Math.max(...list.map(r => r.pricePerServing)).toFixed(2) : 0;
 
+  
+
   return (
     <div className="whole-page">
       <h1>Student Budget Gourmet</h1>
@@ -68,13 +75,13 @@ function App() {
         {filteredResults.map((recipe) => (
           <RecipeInfo 
             key={recipe.id}
+            id={recipe.id}
             image={recipe.image}
             title={recipe.title}
             price={recipe.pricePerServing}
           />
         ))}
       </ul>
-      
       <SideBar filterByPrice={filterByPrice} />
     </div>
   );
